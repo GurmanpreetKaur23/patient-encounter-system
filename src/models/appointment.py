@@ -1,0 +1,45 @@
+from sqlalchemy import (
+    DateTime,
+    ForeignKey,
+    Index,
+    Integer,
+    func,
+)
+from sqlalchemy.orm import Mapped, mapped_column
+
+from src.database import Base
+
+
+class Appointment(Base):
+    __tablename__ = "gurman_appointments"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+
+    patient_id: Mapped[int] = mapped_column(
+        ForeignKey("gurman_patients.id", ondelete="RESTRICT"),
+        nullable=False,
+    )
+
+    doctor_id: Mapped[int] = mapped_column(
+        ForeignKey("gurman_doctors.id", ondelete="RESTRICT"),
+        nullable=False,
+    )
+
+    start_time: Mapped[DateTime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        index=True,
+    )
+
+    duration_minutes: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+    )
+
+    created_at: Mapped[DateTime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False,
+    )
+
+    __table_args__ = (Index("ix_appointments_doctor_start", "doctor_id", "start_time"),)
